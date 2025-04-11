@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern todo application with advanced features like due dates, notifications, and task grouping">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="author" content="Mahmoud Ashraf (SNO7E)">
+    <meta name="keywords" content="todo, task management, productivity, notifications, recurring tasks">
+    <title>Modern Todo Application | by SNO7E</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add preconnect for Font Awesome CDN -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+</head>
+<body>
+    <!-- Skip links for accessibility -->
+    <div class="skip-links">
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+        <a href="#todo-list" class="skip-link">Skip to todo list</a>
+        <a href="#todo-form" class="skip-link">Skip to add task form</a>
+    </div>
+
+    <!-- Screen reader announcements -->
+    <div class="sr-only" aria-live="polite" id="status-region"></div>
+    <div class="sr-only" aria-live="assertive" id="alert-region"></div>
+
+    <div class="container" role="main" id="main-content">
+        <header>
+            <div class="header-content">
+                <h1>Modern Todo Application</h1>
+                <p class="app-subtitle">Built by <a href="https://github.com/SNO7E-G" target="_blank" rel="noopener noreferrer">Mahmoud Ashraf (SNO7E)</a></p>
+            </div>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode" type="button">
+                <span aria-hidden="true">🌙</span>
+                <span class="sr-only">Toggle dark mode</span>
+            </button>
+        </header>
+        
+        <form id="todo-form" aria-labelledby="form-heading" autocomplete="off">
+            <h2 id="form-heading" class="sr-only">Add a new task</h2>
+            <div class="input-group">
+                <input type="text" id="todo-input" placeholder="Add a new task..." aria-label="Task description" required>
+                <input type="date" id="due-date" aria-label="Due date" title="Set due date">
+                <select id="priority" aria-label="Priority level" title="Set priority">
+                    <option value="normal">Normal</option>
+                    <option value="low">Low</option>
+                    <option value="high">High</option>
+                </select>
+                <button type="submit" aria-label="Add new task">
+                    <i class="fas fa-plus" aria-hidden="true"></i> 
+                    <span>Add</span>
+                </button>
+                <!-- Loading indicator -->
+                <div class="loading-indicator" aria-hidden="true" aria-label="Loading" id="todo-form-loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="additional-options">                
+                <div class="option-group">
+                    <label for="recurring">Recurring:</label>
+                    <select id="recurring" aria-label="Recurring pattern">
+                        <option value="">Not recurring</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="weekdays">Weekdays only</option>
+                        <option value="weekends">Weekends only</option>
+                    </select>
+                    
+                    <div id="recurring-end-date-container" style="display:none;" class="recurring-options">
+                        <label for="recurring-end-type">End:</label>
+                        <select id="recurring-end-type" aria-label="Recurring end type">
+                            <option value="until">On date</option>
+                            <option value="occurrences">After occurrences</option>
+                            <option value="never">Never</option>
+                        </select>
+                        
+                        <div class="recurring-end-option">
+                            <label for="recurring-end-date">End date:</label>
+                            <input type="date" id="recurring-end-date" aria-label="Recurring end date">
+                        </div>
+                        
+                        <div class="recurring-end-option" style="display:none;">
+                            <label for="recurring-occurrences">Occurrences:</label>
+                            <input type="number" id="recurring-occurrences" value="3" min="1" max="100" aria-label="Number of occurrences">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="notifications-group">
+                        <input type="checkbox" id="enable-notifications" aria-label="Enable notifications">
+                        <label for="enable-notifications">Enable notifications</label>
+                        <select id="notification-time" aria-label="Notification time" disabled>
+                            <option value="0">At due time</option>
+                            <option value="5">5 minutes before</option>
+                            <option value="15">15 minutes before</option>
+                            <option value="30">30 minutes before</option>
+                            <option value="60">1 hour before</option>
+                            <option value="1440">1 day before</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="filters-container" role="region" aria-label="Task filters">
+            <div class="filters" aria-label="Filter controls">
+                <button class="filter-btn active" data-filter="all" aria-pressed="true" aria-label="Show all tasks" type="button">
+                    <i class="fas fa-tasks fa-lg" aria-hidden="true"></i> 
+                    <span>All Tasks</span>
+                </button>
+                <button class="filter-btn" data-filter="active" aria-pressed="false" aria-label="Show only active tasks" type="button">
+                    <i class="fas fa-clipboard-list fa-lg" aria-hidden="true"></i> 
+                    <span>Active Tasks</span>
+                </button>
+                <button class="filter-btn" data-filter="completed" aria-pressed="false" aria-label="Show only completed tasks" type="button">
+                    <i class="fas fa-check-circle fa-lg" aria-hidden="true"></i> 
+                    <span>Completed</span>
+                </button>
+                <button id="clear-completed" aria-label="Clear all completed tasks" type="button">
+                    <i class="fas fa-trash-alt fa-lg" aria-hidden="true"></i> 
+                    <span>Clear Completed</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="bulk-actions" role="region" aria-label="Bulk task operations">
+            <button id="complete-all" class="action-btn" type="button" aria-label="Mark all tasks as complete">
+                <i class="fas fa-check-double" aria-hidden="true"></i> 
+                <span>Complete All</span>
+            </button>
+            <button id="uncomplete-all" class="action-btn" type="button" aria-label="Mark all tasks as incomplete">
+                <i class="fas fa-times-circle" aria-hidden="true"></i> 
+                <span>Uncomplete All</span>
+            </button>
+            <button id="delete-filtered" class="action-btn danger" type="button" aria-label="Delete all currently filtered tasks">
+                <i class="fas fa-trash" aria-hidden="true"></i> 
+                <span>Delete Filtered</span>
+            </button>
+            <button id="update-recurring" class="action-btn" type="button" aria-label="Update all recurring tasks">
+                <i class="fas fa-sync" aria-hidden="true"></i> 
+                <span>Update Recurring</span>
+            </button>
+            <button id="view-schedule" class="action-btn" type="button" aria-label="View optimized schedule">
+                <i class="fas fa-calendar-alt" aria-hidden="true"></i> 
+                <span>Optimize Schedule</span>
+            </button>
+        </div>
+        
+        <div class="todo-container">
+            <div class="todo-list-header">
+                <h3>Tasks</h3>
+                <div class="todo-sort">
+                    <label for="sort-todos">Sort by:</label>
+                    <select id="sort-todos" aria-label="Sort todos">
+                        <option value="priority">Priority</option>
+                        <option value="dueDate">Due Date</option>
+                        <option value="alphabetical">Alphabetical</option>
+                        <option value="dateCreated">Date Created</option>
+                    </select>
+                </div>
+            </div>
+            <ul id="todo-list" class="todo-list" role="list" aria-live="polite" aria-label="Todo list"></ul>
+            
+            <div class="empty-state-placeholder" id="empty-todo-placeholder" style="display:none;" role="status">
+                <i class="fas fa-tasks fa-3x" aria-hidden="true"></i>
+                <p>No tasks to display. Add a new task to get started!</p>
+            </div>
+        </div>
+        
+        <div class="todo-stats" role="status">
+            <span id="tasks-left" aria-live="polite">0 tasks left</span>
+            <div class="app-controls">
+                <button id="clear-all" aria-label="Clear all tasks" type="button">
+                    <span>Clear All</span>
+                </button>
+                <button id="sound-toggle" aria-label="Toggle sound effects" title="Toggle sound effects" type="button">
+                    <i class="fas fa-volume-up" id="sound-icon" aria-hidden="true"></i>
+                    <span class="sr-only">Toggle sound</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
